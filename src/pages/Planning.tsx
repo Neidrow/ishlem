@@ -146,12 +146,12 @@ const Planning = () => {
                 {appointments.map((appointment) => (
                   <Card 
                     key={appointment.id} 
-                    className={`border border-border hover:shadow-elegant transition-all duration-200 ${getDurationClass(appointment.duration)}`}
+                    className="border border-border hover:shadow-elegant transition-all duration-200"
                   >
-                    <CardContent className="p-4 h-full">
-                      <div className="flex items-start gap-4 h-full">
-                        <div className="flex flex-col items-center gap-1 min-w-fit">
-                          <div className="text-lg font-bold text-primary bg-primary/10 px-3 py-1 rounded-lg">
+                    <CardContent className="p-4">
+                      <div className="flex items-center gap-4">
+                        <div className="flex flex-col items-center gap-1 min-w-fit bg-primary/10 p-3 rounded-lg">
+                          <div className="text-lg font-bold text-primary">
                             {appointment.time}
                           </div>
                           <div className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -160,32 +160,33 @@ const Planning = () => {
                           </div>
                         </div>
                         
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold text-foreground truncate">
+                        <div className="flex-1 space-y-2">
+                          <div className="flex items-center justify-between">
+                            <h3 className="text-lg font-semibold text-foreground">
                               {appointment.service}
                             </h3>
                             {getStatusBadge(appointment.status)}
                           </div>
                           
-                          <div className="space-y-1 text-sm">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <User className="h-4 w-4" />
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4 text-muted-foreground" />
                               <span className="font-medium text-foreground">{appointment.client}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Car className="h-4 w-4" />
-                              <span>{appointment.vehicle}</span>
+                            <div className="flex items-center gap-2">
+                              <Car className="h-4 w-4 text-muted-foreground" />
+                              <span className="text-muted-foreground">{appointment.vehicle}</span>
                             </div>
-                            {appointment.notes && (
-                              <div className="text-muted-foreground mt-2 text-xs bg-muted/30 p-2 rounded">
-                                {appointment.notes}
-                              </div>
-                            )}
                           </div>
+                          
+                          {appointment.notes && (
+                            <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded">
+                              {appointment.notes}
+                            </div>
+                          )}
                         </div>
                         
-                        <div className="flex flex-col gap-2">
+                        <div className="flex gap-2">
                           <Button variant="outline" size="sm">
                             Modifier
                           </Button>
