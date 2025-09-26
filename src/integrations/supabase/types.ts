@@ -14,7 +14,295 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          client_id: string
+          created_at: string
+          date: string
+          description: string | null
+          end_time: string
+          id: string
+          notes: string | null
+          start_time: string
+          status: string | null
+          title: string
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          date: string
+          description?: string | null
+          end_time: string
+          id?: string
+          notes?: string | null
+          start_time: string
+          status?: string | null
+          title: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          end_time?: string
+          id?: string
+          notes?: string | null
+          start_time?: string
+          status?: string | null
+          title?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          email: string | null
+          id: string
+          last_visit: string | null
+          name: string
+          notes: string | null
+          phone: string | null
+          postal_code: string | null
+          status: string | null
+          total_spent: number | null
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_visit?: string | null
+          name: string
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          status?: string | null
+          total_spent?: number | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          last_visit?: string | null
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          postal_code?: string | null
+          status?: string | null
+          total_spent?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      interventions: {
+        Row: {
+          client_id: string
+          cost: number
+          created_at: string
+          date: string
+          description: string | null
+          duration: number
+          id: string
+          notes: string | null
+          parts: Json | null
+          status: string | null
+          technician: string | null
+          type: string
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          client_id: string
+          cost?: number
+          created_at?: string
+          date: string
+          description?: string | null
+          duration: number
+          id?: string
+          notes?: string | null
+          parts?: Json | null
+          status?: string | null
+          technician?: string | null
+          type: string
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          client_id?: string
+          cost?: number
+          created_at?: string
+          date?: string
+          description?: string | null
+          duration?: number
+          id?: string
+          notes?: string | null
+          parts?: Json | null
+          status?: string | null
+          technician?: string | null
+          type?: string
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interventions_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interventions_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount: number
+          client_id: string
+          created_at: string
+          date: string
+          description: string | null
+          due_date: string | null
+          id: string
+          invoice_number: string
+          notes: string | null
+          paid_amount: number | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount?: number
+          client_id: string
+          created_at?: string
+          date: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number: string
+          notes?: string | null
+          paid_amount?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_number?: string
+          notes?: string | null
+          paid_amount?: number | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          client_id: string
+          color: string | null
+          created_at: string
+          id: string
+          last_service: string | null
+          license_plate: string
+          make: string
+          mileage: number | null
+          model: string
+          next_service: string | null
+          notes: string | null
+          status: string | null
+          updated_at: string
+          vin: string | null
+          year: number
+        }
+        Insert: {
+          client_id: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          last_service?: string | null
+          license_plate: string
+          make: string
+          mileage?: number | null
+          model: string
+          next_service?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+          vin?: string | null
+          year: number
+        }
+        Update: {
+          client_id?: string
+          color?: string | null
+          created_at?: string
+          id?: string
+          last_service?: string | null
+          license_plate?: string
+          make?: string
+          mileage?: number | null
+          model?: string
+          next_service?: string | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string
+          vin?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

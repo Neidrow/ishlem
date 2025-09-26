@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { useInterventions } from "@/hooks/useInterventions";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Plus,
   Search,
@@ -18,61 +20,8 @@ import { useState } from "react";
 
 const Interventions = () => {
   const [searchQuery, setSearchQuery] = useState("");
-
-  const interventions = [
-    {
-      id: 1,
-      type: "Révision complète",
-      description: "Révision des 40 000km avec changement filtres",
-      client: "Martin Dupont",
-      vehicle: "Peugeot 308 - AB-123-CD",
-      date: "2024-03-15",
-      duration: 180,
-      cost: 350,
-      status: "completed",
-      technician: "Pierre Martin",
-      parts: ["Filtre à huile", "Filtre à air", "Plaquettes de frein"]
-    },
-    {
-      id: 2,
-      type: "Changement pneus",
-      description: "Montage pneus hiver",
-      client: "Sophie Laurent",
-      vehicle: "Renault Clio - EF-456-GH",
-      date: "2024-03-20",
-      duration: 60,
-      cost: 280,
-      status: "in-progress",
-      technician: "Jean Dubois",
-      parts: ["4 pneus hiver 195/65R15"]
-    },
-    {
-      id: 3,
-      type: "Diagnostic moteur",
-      description: "Diagnostic suite voyant moteur allumé",
-      client: "Jean Moreau",
-      vehicle: "BMW X3 - IJ-789-KL",
-      date: "2024-03-22",
-      duration: 90,
-      cost: 85,
-      status: "scheduled",
-      technician: "Pierre Martin",
-      parts: []
-    },
-    {
-      id: 4,
-      type: "Contrôle technique",
-      description: "Préparation et passage contrôle technique",
-      client: "Marie Dubois",
-      vehicle: "Citroën C3 - MN-012-OP",
-      date: "2024-03-25",
-      duration: 45,
-      cost: 65,
-      status: "scheduled",
-      technician: "Jean Dubois",
-      parts: []
-    }
-  ];
+  const { interventions, loading, updateIntervention } = useInterventions();
+  const { toast } = useToast();
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -104,11 +53,19 @@ const Interventions = () => {
     }
   };
 
+  const completeIntervention = async (id: string) => {
+    try {
+      await updateIntervention(id, { status: 'completed' });
+    } catch (error) {
+      // Error is handled in the hook
+    }
+  };
+
   const filteredInterventions = interventions.filter(intervention =>
     intervention.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    intervention.client.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    intervention.vehicle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    intervention.technician.toLowerCase().includes(searchQuery.toLowerCase())
+    intervention.client?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (intervention.vehicle?.make + ' ' + intervention.vehicle?.model + ' - ' + intervention.vehicle?.license_plate).toLowerCase().includes(searchQuery.toLowerCase()) ||
+    intervention.technician?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -205,8 +162,11 @@ const Interventions = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredInterventions.map((intervention) => (
+          {loading ? (
+            <div className="text-center py-8">Chargement...</div>
+          ) : (
+            <div className="space-y-4">
+              {filteredInterventions.map((intervention) => (
               <Card key={intervention.id} className="border border-border hover:shadow-elegant transition-all duration-200">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between">
@@ -219,7 +179,7 @@ const Interventions = () => {
                           <h3 className="text-xl font-semibold text-foreground">
                             {intervention.type}
                           </h3>
-                          {getStatusBadge(intervention.status)}
+                          {getStatusBadge(intervention.status || 'scheduled')}
                         </div>
                         
                         <p className="text-muted-foreground">{intervention.description}</p>
@@ -228,11 +188,13 @@ const Interventions = () => {
                           <div className="space-y-2">
                             <div className="flex items-center gap-2">
                               <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium text-foreground">{intervention.client}</span>
+                              <span className="font-medium text-foreground">{intervention.client?.name}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Car className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-muted-foreground">{intervention.vehicle}</span>
+                              <span className="text-muted-foreground">
+                                {intervention.vehicle?.make} {intervention.vehicle?.model} - {intervention.vehicle?.license_plate}
+                              </span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Wrench className="h-4 w-4 text-muted-foreground" />
@@ -258,11 +220,11 @@ const Interventions = () => {
                           </div>
                         </div>
                         
-                        {intervention.parts.length > 0 && (
+                        {intervention.parts && Array.isArray(intervention.parts) && intervention.parts.length > 0 && (
                           <div className="mt-3">
                             <p className="text-sm font-medium text-foreground mb-2">Pièces utilisées:</p>
                             <div className="flex flex-wrap gap-2">
-                              {intervention.parts.map((part, index) => (
+                              {intervention.parts.map((part: string, index: number) => (
                                 <Badge key={index} variant="outline" className="text-xs">
                                   {part}
                                 </Badge>
@@ -281,7 +243,7 @@ const Interventions = () => {
                         Détails
                       </Button>
                       {intervention.status === 'in-progress' && (
-                        <Button size="sm">
+                        <Button size="sm" onClick={() => completeIntervention(intervention.id)}>
                           Terminer
                         </Button>
                       )}
@@ -289,8 +251,9 @@ const Interventions = () => {
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
