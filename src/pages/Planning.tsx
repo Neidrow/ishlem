@@ -1,6 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { AppointmentForm } from "@/components/forms/AppointmentForm";
+import { useAppointments } from "@/hooks/useAppointments";
 import { 
   Plus,
   Calendar,
@@ -13,50 +15,11 @@ import {
 import { useState } from "react";
 
 const Planning = () => {
+  const { appointments, loading, updateAppointment } = useAppointments();
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const appointments = [
-    {
-      id: 1,
-      time: "09:00",
-      duration: 120,
-      client: "Martin Dupont",
-      service: "Révision complète",
-      vehicle: "Peugeot 308 - AB-123-CD",
-      status: "confirmed",
-      notes: "Client régulier - véhicule sous garantie"
-    },
-    {
-      id: 2,
-      time: "10:30",
-      duration: 90,
-      client: "Sophie Laurent",
-      service: "Changement pneus",
-      vehicle: "Renault Clio - EF-456-GH",
-      status: "pending",
-      notes: "Pneus hiver à monter"
-    },
-    {
-      id: 3,
-      time: "14:00",
-      duration: 60,
-      client: "Jean Moreau",
-      service: "Diagnostic moteur",
-      vehicle: "BMW X3 - IJ-789-KL",
-      status: "confirmed",
-      notes: "Problème voyant moteur"
-    },
-    {
-      id: 4,
-      time: "16:00",
-      duration: 45,
-      client: "Marie Dubois",
-      service: "Contrôle technique",
-      vehicle: "Citroën C3 - MN-012-OP",
-      status: "confirmed",
-      notes: "Première visite"
-    }
-  ];
+  const today = currentDate.toISOString().split('T')[0];
+  const todayAppointments = appointments.filter(apt => apt.date === today);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -108,10 +71,7 @@ const Planning = () => {
           <h1 className="text-3xl font-bold text-foreground">Planning</h1>
           <p className="text-muted-foreground">Gérez vos rendez-vous et interventions</p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouveau RDV
-        </Button>
+        <AppointmentForm />
       </div>
 
       <Card className="shadow-card">
@@ -136,68 +96,87 @@ const Planning = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {appointments.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Chargement...</p>
+              </div>
+            ) : todayAppointments.length === 0 ? (
               <div className="text-center py-8">
                 <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground">Aucun rendez-vous prévu pour cette date</p>
               </div>
             ) : (
               <div className="space-y-3">
-                {appointments.map((appointment) => (
-                  <Card 
-                    key={appointment.id} 
-                    className="border border-border hover:shadow-elegant transition-all duration-200"
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-center gap-4">
-                        <div className="flex flex-col items-center gap-1 min-w-fit bg-primary/10 p-3 rounded-lg">
-                          <div className="text-lg font-bold text-primary">
-                            {appointment.time}
-                          </div>
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Clock className="h-3 w-3" />
-                            {appointment.duration}min
-                          </div>
-                        </div>
-                        
-                        <div className="flex-1 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <h3 className="text-lg font-semibold text-foreground">
-                              {appointment.service}
-                            </h3>
-                            {getStatusBadge(appointment.status)}
-                          </div>
-                          
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                              <span className="font-medium text-foreground">{appointment.client}</span>
+                {todayAppointments.map((appointment) => {
+                  const startTime = new Date(`2000-01-01T${appointment.start_time}`);
+                  const endTime = new Date(`2000-01-01T${appointment.end_time}`);
+                  const duration = Math.round((endTime.getTime() - startTime.getTime()) / (1000 * 60));
+                  
+                  return (
+                    <Card 
+                      key={appointment.id} 
+                      className="border border-border hover:shadow-elegant transition-all duration-200"
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col items-center gap-1 min-w-fit bg-primary/10 p-3 rounded-lg">
+                            <div className="text-lg font-bold text-primary">
+                              {appointment.start_time.slice(0, 5)}
                             </div>
-                            <div className="flex items-center gap-2">
-                              <Car className="h-4 w-4 text-muted-foreground" />
-                              <span className="text-muted-foreground">{appointment.vehicle}</span>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="h-3 w-3" />
+                              {duration}min
                             </div>
                           </div>
                           
-                          {appointment.notes && (
-                            <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded">
-                              {appointment.notes}
+                          <div className="flex-1 space-y-2">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-lg font-semibold text-foreground">
+                                {appointment.title}
+                              </h3>
+                              {getStatusBadge(appointment.status || 'scheduled')}
                             </div>
-                          )}
+                            
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4 text-muted-foreground" />
+                                <span className="font-medium text-foreground">{appointment.client?.name}</span>
+                              </div>
+                              {appointment.vehicle && (
+                                <div className="flex items-center gap-2">
+                                  <Car className="h-4 w-4 text-muted-foreground" />
+                                  <span className="text-muted-foreground">
+                                    {appointment.vehicle.make} {appointment.vehicle.model} - {appointment.vehicle.license_plate}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {appointment.description && (
+                              <div className="text-xs text-muted-foreground bg-muted/30 p-2 rounded">
+                                {appointment.description}
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            <AppointmentForm 
+                              appointment={appointment}
+                              trigger={<Button variant="outline" size="sm">Modifier</Button>}
+                            />
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => updateAppointment(appointment.id, { status: 'completed' })}
+                            >
+                              Terminer
+                            </Button>
+                          </div>
                         </div>
-                        
-                        <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            Modifier
-                          </Button>
-                          <Button variant="outline" size="sm">
-                            Terminer
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      </CardContent>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -212,24 +191,24 @@ const Planning = () => {
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Total RDV</span>
-              <span className="font-bold text-foreground">{appointments.length}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Temps total</span>
-              <span className="font-bold text-foreground">
-                {appointments.reduce((total, apt) => total + apt.duration, 0)} min
-              </span>
+              <span className="font-bold text-foreground">{todayAppointments.length}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Confirmés</span>
               <span className="font-bold text-success">
-                {appointments.filter(apt => apt.status === "confirmed").length}
+                {todayAppointments.filter(apt => apt.status === "confirmed").length}
               </span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">En attente</span>
+              <span className="text-muted-foreground">Programmés</span>
               <span className="font-bold text-warning">
-                {appointments.filter(apt => apt.status === "pending").length}
+                {todayAppointments.filter(apt => apt.status === "scheduled").length}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-muted-foreground">Terminés</span>
+              <span className="font-bold text-success">
+                {todayAppointments.filter(apt => apt.status === "completed").length}
               </span>
             </div>
           </CardContent>
@@ -240,10 +219,14 @@ const Planning = () => {
             <CardTitle className="text-lg font-semibold">Actions rapides</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Button className="w-full justify-start" variant="outline">
-              <Plus className="h-4 w-4 mr-2" />
-              Nouveau rendez-vous
-            </Button>
+            <AppointmentForm 
+              trigger={
+                <Button className="w-full justify-start" variant="outline">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouveau rendez-vous
+                </Button>
+              }
+            />
             <Button className="w-full justify-start" variant="outline">
               <Calendar className="h-4 w-4 mr-2" />
               Vue semaine

@@ -65,6 +65,9 @@ export const ClientForm: React.FC<ClientFormProps> = ({ client, trigger, onSucce
           <DialogTitle>
             {client ? 'Modifier le client' : 'Nouveau client'}
           </DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            {client ? 'Modifiez les informations du client' : 'Ajoutez un nouveau client à votre base'}
+          </p>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

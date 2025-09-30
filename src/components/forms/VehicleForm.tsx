@@ -71,6 +71,9 @@ export const VehicleForm: React.FC<VehicleFormProps> = ({ vehicle, trigger, onSu
           <DialogTitle>
             {vehicle ? 'Modifier le véhicule' : 'Nouveau véhicule'}
           </DialogTitle>
+          <p className="text-sm text-muted-foreground">
+            {vehicle ? 'Modifiez les informations du véhicule' : 'Ajoutez un nouveau véhicule'}
+          </p>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">

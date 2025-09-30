@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { InvoiceForm } from "@/components/forms/InvoiceForm";
+import { useInvoices } from "@/hooks/useInvoices";
 import { 
   Plus,
   Search,
@@ -14,54 +16,12 @@ import {
 import { useState } from "react";
 
 const Factures = () => {
+  const { invoices, loading } = useInvoices();
   const [searchTerm, setSearchTerm] = useState("");
 
-  const factures = [
-    {
-      id: "2024-001",
-      client: "Martin Dupont",
-      date: "2024-01-20",
-      dueDate: "2024-02-20",
-      amount: 450.00,
-      status: "paid",
-      items: ["Vidange", "Filtre à huile", "Main d'oeuvre"],
-      description: "Révision complète véhicule"
-    },
-    {
-      id: "2024-002",
-      client: "Sophie Laurent",
-      date: "2024-01-18",
-      dueDate: "2024-02-18",
-      amount: 280.00,
-      status: "pending",
-      items: ["Changement plaquettes", "Main d'oeuvre"],
-      description: "Remplacement plaquettes de frein"
-    },
-    {
-      id: "2024-003",
-      client: "Jean Moreau",
-      date: "2024-01-15",
-      dueDate: "2024-02-15",
-      amount: 750.00,
-      status: "overdue",
-      items: ["Diagnostic électronique", "Réparation alternateur", "Main d'oeuvre"],
-      description: "Réparation système électrique"
-    },
-    {
-      id: "2024-004",
-      client: "Marie Dubois",
-      date: "2024-01-22",
-      dueDate: "2024-02-22",
-      amount: 150.00,
-      status: "draft",
-      items: ["Contrôle technique", "Certificat"],
-      description: "Préparation contrôle technique"
-    }
-  ];
-
-  const filteredFactures = factures.filter(facture =>
-    facture.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    facture.client.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredInvoices = invoices.filter(invoice =>
+    invoice.invoice_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    invoice.client?.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const getStatusBadge = (status: string) => {
@@ -79,10 +39,10 @@ const Factures = () => {
     }
   };
 
-  const totalAmount = filteredFactures.reduce((sum, facture) => sum + facture.amount, 0);
-  const paidAmount = filteredFactures
+  const totalAmount = filteredInvoices.reduce((sum, invoice) => sum + invoice.amount, 0);
+  const paidAmount = filteredInvoices
     .filter(f => f.status === "paid")
-    .reduce((sum, facture) => sum + facture.amount, 0);
+    .reduce((sum, invoice) => sum + invoice.amount, 0);
 
   return (
     <div className="space-y-6">
@@ -91,10 +51,7 @@ const Factures = () => {
           <h1 className="text-3xl font-bold text-foreground">Factures</h1>
           <p className="text-muted-foreground">Gérez vos factures et paiements</p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle facture
-        </Button>
+        <InvoiceForm />
       </div>
 
       <div className="grid gap-4 md:grid-cols-3">
@@ -154,65 +111,87 @@ const Factures = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {filteredFactures.map((facture) => (
-              <Card key={facture.id} className="border border-border hover:shadow-elegant transition-all duration-200">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-3">
-                        <FileText className="h-5 w-5 text-primary" />
-                        <h3 className="text-lg font-semibold text-foreground">Facture #{facture.id}</h3>
-                        {getStatusBadge(facture.status)}
-                      </div>
-                      
-                      <div className="grid md:grid-cols-2 gap-4 text-sm">
-                        <div className="space-y-2">
-                          <div>
-                            <span className="text-muted-foreground">Client: </span>
-                            <span className="font-medium text-foreground">{facture.client}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Date: </span>
-                            <span className="text-foreground">{new Date(facture.date).toLocaleDateString('fr-FR')}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Échéance: </span>
-                            <span className="text-foreground">{new Date(facture.dueDate).toLocaleDateString('fr-FR')}</span>
-                          </div>
+            {loading ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Chargement...</p>
+              </div>
+            ) : filteredInvoices.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground">Aucune facture trouvée</p>
+              </div>
+            ) : (
+              filteredInvoices.map((invoice) => (
+                <Card key={invoice.id} className="border border-border hover:shadow-elegant transition-all duration-200">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-3">
+                          <FileText className="h-5 w-5 text-primary" />
+                          <h3 className="text-lg font-semibold text-foreground">Facture #{invoice.invoice_number}</h3>
+                          {getStatusBadge(invoice.status || 'draft')}
                         </div>
                         
-                        <div className="space-y-2">
-                          <div>
-                            <span className="text-muted-foreground">Montant: </span>
-                            <span className="text-lg font-bold text-foreground">{facture.amount.toFixed(2)}€</span>
+                        <div className="grid md:grid-cols-2 gap-4 text-sm">
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-muted-foreground">Client: </span>
+                              <span className="font-medium text-foreground">{invoice.client?.name}</span>
+                            </div>
+                            <div>
+                              <span className="text-muted-foreground">Date: </span>
+                              <span className="text-foreground">{new Date(invoice.date).toLocaleDateString('fr-FR')}</span>
+                            </div>
+                            {invoice.due_date && (
+                              <div>
+                                <span className="text-muted-foreground">Échéance: </span>
+                                <span className="text-foreground">{new Date(invoice.due_date).toLocaleDateString('fr-FR')}</span>
+                              </div>
+                            )}
                           </div>
-                          <div>
-                            <span className="text-muted-foreground">Description: </span>
-                            <span className="text-foreground">{facture.description}</span>
-                          </div>
-                          <div>
-                            <span className="text-muted-foreground">Services: </span>
-                            <span className="text-foreground">{facture.items.join(', ')}</span>
+                          
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-muted-foreground">Montant: </span>
+                              <span className="text-lg font-bold text-foreground">{invoice.amount.toFixed(2)}€</span>
+                            </div>
+                            {invoice.paid_amount && invoice.paid_amount > 0 && (
+                              <div>
+                                <span className="text-muted-foreground">Payé: </span>
+                                <span className="text-foreground">{invoice.paid_amount.toFixed(2)}€</span>
+                              </div>
+                            )}
+                            {invoice.description && (
+                              <div>
+                                <span className="text-muted-foreground">Description: </span>
+                                <span className="text-foreground">{invoice.description}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
+                      
+                      <div className="flex gap-2 ml-4">
+                        <Button variant="outline" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                        <InvoiceForm 
+                          invoice={invoice}
+                          trigger={
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          }
+                        />
+                        <Button variant="outline" size="sm">
+                          <Download className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                    
-                    <div className="flex gap-2 ml-4">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm">
-                        <Download className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
         </CardContent>
       </Card>

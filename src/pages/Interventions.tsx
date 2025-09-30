@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { InterventionForm } from "@/components/forms/InterventionForm";
 import { useInterventions } from "@/hooks/useInterventions";
 import { useToast } from "@/hooks/use-toast";
 import { 
@@ -75,10 +76,7 @@ const Interventions = () => {
           <h1 className="text-3xl font-bold text-foreground">Interventions</h1>
           <p className="text-muted-foreground">Suivi des interventions et réparations</p>
         </div>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Nouvelle intervention
-        </Button>
+        <InterventionForm />
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
@@ -236,9 +234,14 @@ const Interventions = () => {
                     </div>
                     
                     <div className="flex flex-col gap-2">
-                      <Button variant="outline" size="sm">
-                        Modifier
-                      </Button>
+                      <InterventionForm 
+                        intervention={intervention}
+                        trigger={
+                          <Button variant="outline" size="sm">
+                            Modifier
+                          </Button>
+                        }
+                      />
                       <Button variant="outline" size="sm">
                         Détails
                       </Button>
