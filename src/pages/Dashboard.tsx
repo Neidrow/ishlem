@@ -1,6 +1,7 @@
 import { StatsCard } from "@/components/StatsCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { 
   Users, 
   FileText, 
@@ -11,34 +12,59 @@ import {
   CheckCircle,
   AlertCircle
 } from "lucide-react";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AppointmentForm } from "@/components/forms/AppointmentForm";
+import { InvoiceForm } from "@/components/forms/InvoiceForm";
+import { useClients } from "@/hooks/useClients";
+import { useInvoices } from "@/hooks/useInvoices";
+import { useAppointments } from "@/hooks/useAppointments";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
+  const [showInvoiceDialog, setShowInvoiceDialog] = useState(false);
+  const { clients } = useClients();
+  const { invoices } = useInvoices();
+  const { appointments } = useAppointments();
+
+  // Calcul des statistiques réelles
+  const activeClients = clients.filter(c => c.status === 'active').length;
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+  
+  const monthlyInvoices = invoices.filter(inv => {
+    const invDate = new Date(inv.date);
+    return invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear;
+  });
+
+  const monthlyRevenue = monthlyInvoices.reduce((sum, inv) => sum + (inv.amount || 0), 0);
+  
+  const today = new Date().toISOString().split('T')[0];
+  const todayAppointments = appointments.filter(apt => apt.date === today);
+
   const stats = [
     {
       title: "Clients Actifs",
-      value: 156,
+      value: activeClients,
       description: "Total des clients",
       icon: Users,
-      trend: { value: 12, label: "ce mois" }
     },
     {
       title: "Factures du Mois",
-      value: 42,
+      value: monthlyInvoices.length,
       description: "Factures émises",
       icon: FileText,
-      trend: { value: 8, label: "vs mois dernier" }
     },
     {
       title: "Chiffre d'Affaires",
-      value: "28 450€",
+      value: `${monthlyRevenue.toLocaleString('fr-FR')}€`,
       description: "Ce mois",
       icon: Euro,
       variant: "success" as const,
-      trend: { value: 15, label: "vs mois dernier" }
     },
     {
       title: "RDV Aujourd'hui",
-      value: 8,
+      value: todayAppointments.length,
       description: "Rendez-vous planifiés",
       icon: Calendar,
       variant: "warning" as const
@@ -73,11 +99,11 @@ const Dashboard = () => {
           <p className="text-muted-foreground">Vue d'ensemble de votre activité</p>
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => navigate('/planning')}>
             <Calendar className="h-4 w-4 mr-2" />
             Planning
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => setShowInvoiceDialog(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle facture
           </Button>
@@ -148,6 +174,19 @@ const Dashboard = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Dialog pour nouvelle facture */}
+      <Dialog open={showInvoiceDialog} onOpenChange={setShowInvoiceDialog}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Nouvelle Facture</DialogTitle>
+            <DialogDescription>
+              Créez une nouvelle facture pour un client
+            </DialogDescription>
+          </DialogHeader>
+          <InvoiceForm onSuccess={() => setShowInvoiceDialog(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
