@@ -188,6 +188,56 @@ export type Database = {
           },
         ]
       }
+      invoice_items: {
+        Row: {
+          created_at: string
+          description: string
+          discount_percent: number | null
+          id: string
+          invoice_id: string
+          quantity: number
+          sort_order: number | null
+          subtotal: number
+          tax_rate: number
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          discount_percent?: number | null
+          id?: string
+          invoice_id: string
+          quantity?: number
+          sort_order?: number | null
+          subtotal?: number
+          tax_rate?: number
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          discount_percent?: number | null
+          id?: string
+          invoice_id?: string
+          quantity?: number
+          sort_order?: number | null
+          subtotal?: number
+          tax_rate?: number
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoices: {
         Row: {
           amount: number
@@ -195,12 +245,17 @@ export type Database = {
           created_at: string
           date: string
           description: string | null
+          discount_amount: number | null
           due_date: string | null
           id: string
           invoice_number: string
           notes: string | null
           paid_amount: number | null
           status: string | null
+          subtotal: number | null
+          tax_amount: number | null
+          tax_rate: number | null
+          terms: string | null
           updated_at: string
         }
         Insert: {
@@ -209,12 +264,17 @@ export type Database = {
           created_at?: string
           date: string
           description?: string | null
+          discount_amount?: number | null
           due_date?: string | null
           id?: string
           invoice_number: string
           notes?: string | null
           paid_amount?: number | null
           status?: string | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms?: string | null
           updated_at?: string
         }
         Update: {
@@ -223,12 +283,17 @@ export type Database = {
           created_at?: string
           date?: string
           description?: string | null
+          discount_amount?: number | null
           due_date?: string | null
           id?: string
           invoice_number?: string
           notes?: string | null
           paid_amount?: number | null
           status?: string | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -240,6 +305,113 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      quote_items: {
+        Row: {
+          created_at: string
+          description: string
+          discount_percent: number | null
+          id: string
+          quantity: number
+          quote_id: string
+          sort_order: number | null
+          subtotal: number
+          tax_rate: number
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          discount_percent?: number | null
+          id?: string
+          quantity?: number
+          quote_id: string
+          sort_order?: number | null
+          subtotal?: number
+          tax_rate?: number
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          discount_percent?: number | null
+          id?: string
+          quantity?: number
+          quote_id?: string
+          sort_order?: number | null
+          subtotal?: number
+          tax_rate?: number
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quote_items_quote_id_fkey"
+            columns: ["quote_id"]
+            isOneToOne: false
+            referencedRelation: "quotes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotes: {
+        Row: {
+          client_id: string
+          created_at: string
+          date: string
+          description: string | null
+          discount_amount: number | null
+          expiry_date: string | null
+          id: string
+          notes: string | null
+          quote_number: string
+          status: string | null
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          terms: string | null
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          date: string
+          description?: string | null
+          discount_amount?: number | null
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          quote_number: string
+          status?: string | null
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          terms?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          date?: string
+          description?: string | null
+          discount_amount?: number | null
+          expiry_date?: string | null
+          id?: string
+          notes?: string | null
+          quote_number?: string
+          status?: string | null
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          terms?: string | null
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       vehicles: {
         Row: {

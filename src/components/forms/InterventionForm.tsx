@@ -17,7 +17,7 @@ interface InterventionFormProps {
 }
 
 export const InterventionForm: React.FC<InterventionFormProps> = ({ intervention, trigger, onSuccess }) => {
-  const { createIntervention, updateIntervention } = useInterventions();
+  const { createIntervention, updateIntervention, refetch } = useInterventions();
   const { clients } = useClients();
   const { vehicles } = useVehicles();
   const [open, setOpen] = useState(false);
@@ -46,6 +46,7 @@ export const InterventionForm: React.FC<InterventionFormProps> = ({ intervention
       } else {
         await createIntervention(formData);
       }
+      await refetch(); // Rafraîchir la liste immédiatement
       setOpen(false);
       onSuccess?.();
     } catch (error) {
